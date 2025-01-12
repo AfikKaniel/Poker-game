@@ -2,6 +2,7 @@
     Poker Game
     Copyright (c) 2024
     All rights reserved.
+    Created by [Your Name]
 -->
 <!DOCTYPE html>
 <html>
@@ -200,6 +201,7 @@
 
         // Game initialization
         function startGame() {
+            console.log('Game starting...');  // Add this line for debugging
             document.querySelector('.start-screen').style.display = 'none';
             document.querySelector('.game-content').style.display = 'block';
             createBoard();
@@ -387,10 +389,12 @@
         }
 
         function evaluatePokerHand(cards) {
+            // Check if column is completely empty
             if (cards.every(card => card === null)) {
                 return 'None';
             }
 
+            // Filter out null values for evaluation
             const validCards = cards.filter(card => card !== null);
             
             const getCardValue = (card) => {
@@ -431,91 +435,4 @@
                 if (isFlush && validCards.length === 5) return 'Flush';
                 if (isStraight && validCards.length === 5) return 'Straight';
                 if (counts.includes(3)) return 'Three of a Kind';
-                if (counts.filter(count => count === 2).length === 2) return 'Two Pairs';
-                if (counts.includes(2)) return 'One Pair';
-                return 'High Card';
-            }
-            
-            return 'High Card';
-        }
-
-        function endGame(reason = 'complete') {
-            clearInterval
-function endGame(reason = 'complete') {
-            clearInterval(timerInterval);
-            
-            // Clear current card display
-            document.querySelector('.current-card').innerHTML = '';
-            
-            // Make deck appear empty
-            document.querySelector('.deck-pile').style.opacity = '0.3';
-            
-            // Evaluate each column
-            const results = [];
-            const columnCards = [];
-            for (let col = 0; col < 5; col++) {
-                const cards = getColumnCards(col);
-                columnCards.push(cards);
-                results.push(evaluatePokerHand(cards));
-            }
-            
-            // Create and show results popup
-            const popup = document.createElement('div');
-            popup.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #333;
-                padding: 15px;
-                border-radius: 10px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                z-index: 1000;
-                width: 90%;
-                max-width: 400px;
-            `;
-            
-            popup.innerHTML = `
-                <h2 style="
-                    ${reason === 'timeout' ? 'color: #ff4444;' : 'color: #4CAF50;'} 
-                    text-align: center; 
-                    margin-bottom: 10px; 
-                    font-size: 20px;"
-                >
-                    ${reason === 'timeout' ? 'TIME IS UP!' : 'GREAT JOB!'}
-                </h2>
-                <div style="margin-bottom: 10px;">
-                    ${results.map((result, index) => `
-                        <div style="margin: 5px 0; padding: 8px; background: #444; border-radius: 5px;">
-                            <div style="margin-bottom: 3px; font-size: 14px;">
-                                <strong>Column ${index + 1}:</strong> ${result}
-                            </div>
-                            <div style="background: rgba(255,255,255,0.1); padding: 3px; border-radius: 3px; display: flex; flex-wrap: wrap; gap: 2px;">
-                                ${columnCards[index].map(card => renderCardSmall(card)).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="color: #888; text-align: center; font-size: 14px;">
-                    ${reason === 'timeout' ? 'Time Limit: ' : 'Completion Time: '}${formatElapsedTime(timeRemaining)}
-                </div>
-            `;
-            
-            // Add overlay
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.7);
-                z-index: 999;
-            `;
-            
-            document.body.appendChild(overlay);
-            document.body.appendChild(popup);
-        }
-    </script>
-</body>
-</html>
+                if (counts.filter(count => count === 2).length ===
