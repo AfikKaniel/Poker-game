@@ -1,0 +1,437 @@
+<!-- 
+    Poker Game
+    Copyright (c) 2024
+    All rights reserved.
+    Created by [Your Name]
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Level Poker Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 5px;
+            background: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .start-screen {
+            text-align: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 320px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .welcome-text {
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: white;
+        }
+
+        .welcome-text p {
+            margin-bottom: 15px;
+        }
+
+        .welcome-title {
+            font-size: 20px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .start-button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .start-button:hover {
+            background: #45a049;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 16px;
+            margin: 5px 0;
+            color: #00ff00;
+        }
+
+        .deck-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 5px 0;
+        }
+
+        .game-board {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .level {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .card-placeholder {
+            width: 45px;
+            height: 63px;
+            border: 1px dashed #666;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #333;
+            font-size: 10px;
+        }
+
+        .card-placeholder.available {
+            border-color: #00ff00;
+            background: #1f3d1f;
+        }
+
+        .card-placeholder.filled {
+            border-style: solid;
+            border-color: #444;
+            background: white;
+        }
+
+        .deck-pile {
+            width: 45px;
+            height: 63px;
+            background: linear-gradient(135deg, #dc0000 0%, #850000 100%);
+            border: 1px solid white;
+            border-radius: 4px;
+        }
+
+        .current-card {
+            width: 45px;
+            height: 63px;
+            border: 1px solid #666;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .cards-remaining {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="start-screen">
+            <div class="welcome-text">
+                <div class="welcome-title">Hey! Welcome to the coolest game!</div>
+                <p>Each column is a professional poker hand!</p>
+                <p>You have exactly 2:30 minutes to fill<br>
+                   the board with cards to get the best<br>
+                   poker hand!</p>
+                <p style="color: #4CAF50;">Good luck!</p>
+            </div>
+            <button class="start-button" onclick="startGame()">Start Game</button>
+        </div>
+        <div class="game-content" style="display: none;">
+            <div class="timer">02:30</div>
+            <div class="deck-area">
+                <div class="deck-pile"></div>
+                <div class="current-card"></div>
+                <div class="cards-remaining">Cards remaining: 52</div>
+            </div>
+            <div class="game-board"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let deck = [];
+        let currentCard = null;
+        let gameBoard = Array(5).fill().map(() => Array(5).fill(null));
+        let currentLevel = 0;
+        let timeRemaining = 150;
+        let timerInterval;
+
+        const suits = ['♥', '♦', '♣', '♠'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+        // Game initialization
+        function startGame() {
+            document.querySelector('.start-screen').style.display = 'none';
+            document.querySelector('.game-content').style.display = 'block';
+            createBoard();
+            createDeck();
+            shuffleDeck();
+            drawCard();
+            startTimer();
+        }
+
+        function createBoard() {
+            const gameBoard = document.querySelector('.game-board');
+            gameBoard.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const level = document.createElement('div');
+                level.className = 'level';
+                for (let j = 0; j < 5; j++) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'card-placeholder';
+                    placeholder.dataset.level = i;
+                    placeholder.dataset.position = j;
+                    placeholder.onclick = () => placeCard(i, j);
+                    level.appendChild(placeholder);
+                }
+                gameBoard.appendChild(level);
+            }
+            updateAvailablePositions();
+        }
+
+        function createDeck() {
+            deck = [];
+            for (const value of values) {
+                for (const suit of suits) {
+                    deck.push({
+                        value,
+                        suit,
+                        color: (suit === '♥' || suit === '♦') ? 'red' : 'black'
+                    });
+                }
+            }
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function drawCard() {
+            if (deck.length === 0) return null;
+            currentCard = deck.pop();
+            const cardElement = document.querySelector('.current-card');
+            if (currentCard && cardElement) {
+                cardElement.innerHTML = `
+                    <div class="card" style="color: ${currentCard.color}">
+                        <div class="card-value">${currentCard.value}</div>
+                        <div class="card-suit">${currentCard.suit}</div>
+                    </div>
+                `;
+            }
+            document.querySelector('.cards-remaining').textContent = `Cards remaining: ${deck.length}`;
+            return currentCard;
+        }
+
+        function placeCard(level, position) {
+            if (!isValidMove(level, position) || !currentCard) return;
+
+            const placeholder = document.querySelector(`[data-level="${level}"][data-position="${position}"]`);
+            if (placeholder) {
+                placeholder.innerHTML = `
+                    <div class="card" style="color: ${currentCard.color}">
+                        <div class="card-value">${currentCard.value}</div>
+                        <div class="card-suit">${currentCard.suit}</div>
+                    </div>
+                `;
+                placeholder.classList.add('filled');
+                
+                gameBoard[level][position] = currentCard;
+                
+                if (isLevelComplete(level)) {
+                    currentLevel = Math.min(currentLevel + 1, 4);
+                }
+                
+                drawCard();
+                updateAvailablePositions();
+                
+                if (isBoardComplete()) {
+                    endGame('complete');
+                }
+            }
+        }
+
+        function isValidMove(level, position) {
+            if (level !== currentLevel) return false;
+            if (gameBoard[level][position] !== null) return false;
+            
+            // First card of the game can go anywhere in first level
+            if (deck.length === 51 && level === 0) return true;
+            
+            // First card of a level can go anywhere in that level
+            const levelCards = gameBoard[level].filter(card => card !== null);
+            if (levelCards.length === 0) return true;
+            
+            return true;
+        }
+
+        function isLevelComplete(level) {
+            return gameBoard[level].every(card => card !== null);
+        }
+
+        function isBoardComplete() {
+            return gameBoard.every(level => level.every(card => card !== null));
+        }
+
+        function updateAvailablePositions() {
+            const placeholders = document.querySelectorAll('.card-placeholder');
+            placeholders.forEach(placeholder => {
+                const level = parseInt(placeholder.dataset.level);
+                const position = parseInt(placeholder.dataset.position);
+                placeholder.classList.toggle('available', isValidMove(level, position));
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                if (timeRemaining <= 0) {
+                    endGame('timeout');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.querySelector('.timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function getColumnCards(col) {
+            return gameBoard.map(row => row[col]);
+        }
+
+        function formatElapsedTime(remainingTime) {
+            const elapsedSeconds = 150 - remainingTime;
+            const minutes = Math.floor(elapsedSeconds / 60);
+            const seconds = elapsedSeconds % 60;
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function renderCardSmall(card) {
+            if (card === null) {
+                return `
+                    <div style="
+                        display: inline-flex;
+                        align-items: center;
+                        background: #666;
+                        border-radius: 2px;
+                        padding: 2px 3px;
+                        margin: 1px;
+                        font-size: 10px;
+                        color: #444;
+                        width: 25px;
+                        justify-content: center;
+                    ">
+                        －
+                    </div>
+                `;
+            }
+            return `
+                <div style="
+                    display: inline-flex;
+                    align-items: center;
+                    background: white;
+                    border-radius: 2px;
+                    padding: 2px 3px;
+                    margin: 1px;
+                    font-size: 10px;
+                    color: ${card.suit === '♥' || card.suit === '♦' ? '#dc0000' : 'black'};
+                ">
+                    ${card.value}${card.suit}
+                </div>
+            `;
+        }
+
+        function evaluatePokerHand(cards) {
+            // Check if column is completely empty
+            if (cards.every(card => card === null)) {
+                return 'None';
+            }
+
+            // Filter out null values for evaluation
+            const validCards = cards.filter(card => card !== null);
+            
+            const getCardValue = (card) => {
+                const values = {
+                    '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+                    'J': 11, 'Q': 12, 'K': 13, 'A': 14
+                };
+                return values[card.value];
+            };
+
+            const sortedHand = [...validCards].sort((a, b) => getCardValue(a) - getCardValue(b));
+            
+            if (validCards.length > 0) {
+                const isFlush = validCards.every(card => card.suit === validCards[0].suit);
+                
+                let isStraight = true;
+                if (validCards.length > 1) {
+                    for (let i = 1; i < sortedHand.length; i++) {
+                        if (getCardValue(sortedHand[i]) !== getCardValue(sortedHand[i-1]) + 1) {
+                            isStraight = false;
+                            break;
+                        }
+                    }
+                } else {
+                    isStraight = false;
+                }
+
+                const valueCounts = {};
+                validCards.forEach(card => {
+                    valueCounts[card.value] = (valueCounts[card.value] || 0) + 1;
+                });
+                const counts = Object.values(valueCounts);
+
+                if (isFlush && isStraight && getCardValue(sortedHand[0]) === 10 && validCards.length === 5) return 'Royal Flush';
+                if (isFlush && isStraight && validCards.length === 5) return 'Straight Flush';
+                if (counts.includes(4)) return 'Four of a Kind';
+                if (counts.includes(3) && counts.includes(2)) return 'Full House';
+                if (isFlush && validCards.length === 5) return 'Flush';
+                if (isStraight && validCards.length === 5) return 'Straight';
+                if (counts.includes(3)) return 'Three of a Kind';
+                if (counts.filter(count => count === 2).length ===
