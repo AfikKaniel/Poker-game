@@ -522,9 +522,26 @@
                             </div>
                         `).join('')}
                     </div>
-                    <div style="color: #888; text-align: center; font-size: 16px;">
+                    <div style="color: #888; text-align: center; font-size: 16px; margin-bottom: 20px;">
                         ${reason === 'timeout' ? 'Time Limit: ' : 'Completion Time: '}${formatElapsedTime(timeRemaining)}
                     </div>
+                    <button 
+                        style="
+                            background: #4CAF50;
+                            color: white;
+                            padding: 15px 35px;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 18px;
+                            cursor: pointer;
+                            display: block;
+                            width: 100%;
+                            transition: background 0.3s;
+                        "
+                        onclick="window.location.reload();"
+                    >
+                        START AGAIN
+                    </button>
                 `;
                 
                 // Add overlay
