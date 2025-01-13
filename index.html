@@ -13,7 +13,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            padding: 5px;
+            padding: 8px;
             background: #1a1a1a;
             color: white;
             min-height: 100vh;
@@ -26,7 +26,7 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
         }
 
         .start-screen {
@@ -36,41 +36,42 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: #2a2a2a;
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 320px;
+            padding: 30px;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 360px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             z-index: 1000;
         }
 
         .welcome-text {
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             line-height: 1.6;
             color: white;
         }
 
         .welcome-text p {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            font-size: 16px;
         }
 
         .welcome-title {
-            font-size: 20px;
+            font-size: 24px;
             color: #4CAF50;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-weight: bold;
         }
 
         .start-button {
             background: #4CAF50;
             color: white;
-            padding: 12px 30px;
+            padding: 15px 35px;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
             transition: background 0.3s;
-            margin-top: 20px;
+            margin-top: 25px;
         }
 
         .start-button:hover {
@@ -84,8 +85,8 @@
 
         .timer {
             text-align: center;
-            font-size: 16px;
-            margin: 5px 0;
+            font-size: 20px;
+            margin: 8px 0;
             color: #00ff00;
         }
 
@@ -93,31 +94,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin: 5px 0;
+            gap: 12px;
+            margin: 10px 0;
         }
 
         .game-board {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .level {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             justify-content: center;
         }
 
         .card-placeholder {
-            width: 45px;
-            height: 63px;
-            border: 1px dashed #666;
-            border-radius: 4px;
+            width: 60px;
+            height: 84px;
+            border: 2px dashed #666;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
             background: #333;
-            font-size: 10px;
+            font-size: 14px;
         }
 
         .card-placeholder.available {
@@ -132,18 +133,18 @@
         }
 
         .deck-pile {
-            width: 45px;
-            height: 63px;
+            width: 60px;
+            height: 84px;
             background: linear-gradient(135deg, #dc0000 0%, #850000 100%);
-            border: 1px solid white;
-            border-radius: 4px;
+            border: 2px solid white;
+            border-radius: 6px;
         }
 
         .current-card {
-            width: 45px;
-            height: 63px;
-            border: 1px solid #666;
-            border-radius: 4px;
+            width: 60px;
+            height: 84px;
+            border: 2px solid #666;
+            border-radius: 6px;
             background: white;
         }
 
@@ -154,17 +155,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 16px;
         }
 
         .cards-remaining {
-            font-size: 12px;
+            font-size: 16px;
             color: #888;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+        <div class="game-container">
         <div class="start-screen">
             <div class="welcome-text">
                 <div class="welcome-title">Hey! Welcome to the coolest game!</div>
@@ -186,35 +187,68 @@
             <div class="game-board"></div>
         </div>
     </div>
-
     <script>
-document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Game state
             let deck = [];
             let currentCard = null;
             let gameBoard = Array(5).fill().map(() => Array(5).fill(null));
-            let currentLevel = 0;
+            let currentLevel = 1; // Start from level 1 since level 0 will be pre-filled
             let timeRemaining = 150;
             let timerInterval;
 
             const suits = ['♥', '♦', '♣', '♠'];
             const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-            // Add event listener to start button
-            document.getElementById('startButton').addEventListener('click', function() {
-                console.log('Start button clicked');
-                startGame();
-            });
-// Game initialization
+            document.getElementById('startButton').addEventListener('click', startGame);
+
             function startGame() {
                 console.log('Starting game...');
                 document.querySelector('.start-screen').style.display = 'none';
                 document.querySelector('.game-content').style.display = 'block';
-                createBoard();
+                
                 createDeck();
                 shuffleDeck();
+                createBoard();
+                prefillFirstLevel(); // New function to pre-fill first level
                 drawCard();
                 startTimer();
+            }
+
+            // New function to pre-fill first level
+            function prefillFirstLevel() {
+                // Take 5 random cards from the deck for the first level
+                for (let i = 0; i < 5; i++) {
+                    const randomCard = deck.pop();
+                    gameBoard[0][i] = randomCard;
+                    
+                    const placeholder = document.querySelector(`[data-level="0"][data-position="${i}"]`);
+                    if (placeholder && randomCard) {
+                        placeholder.innerHTML = `
+                            <div class="card" style="color: ${randomCard.color}">
+                                <div class="card-value">${randomCard.value}</div>
+                                <div class="card-suit">${randomCard.suit}</div>
+                            </div>
+                        `;
+                        placeholder.classList.add('filled');
+                    }
+                }
+                document.querySelector('.cards-remaining').textContent = `Cards remaining: ${deck.length}`;
+            }
+
+            // Modify isValidMove to account for the pre-filled first level
+            function isValidMove(level, position) {
+                if (level === 0) return false; // First level is not playable
+                if (level !== currentLevel) return false;
+                if (gameBoard[level][position] !== null) return false;
+                
+                // First move on level 1 is always valid
+                if (level === 1 && gameBoard[1].every(card => card === null)) return true;
+                
+                const levelCards = gameBoard[level].filter(card => card !== null);
+                if (levelCards.length === 0) return true;
+                
+                return true;
             }
 
             function createBoard() {
@@ -271,7 +305,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelector('.cards-remaining').textContent = `Cards remaining: ${deck.length}`;
                 return currentCard;
             }
-function placeCard(level, position) {
+
+            function placeCard(level, position) {
                 if (!isValidMove(level, position) || !currentCard) return;
 
                 const placeholder = document.querySelector(`[data-level="${level}"][data-position="${position}"]`);
@@ -299,16 +334,21 @@ function placeCard(level, position) {
                 }
             }
 
-            function isValidMove(level, position) {
-                if (level !== currentLevel) return false;
-                if (gameBoard[level][position] !== null) return false;
-                
-                if (deck.length === 51 && level === 0) return true;
-                
-                const levelCards = gameBoard[level].filter(card => card !== null);
-                if (levelCards.length === 0) return true;
-                
-                return true;
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                    if (timeRemaining <= 0) {
+                        endGame('timeout');
+                    }
+                }, 1000);
+            }
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                document.querySelector('.timer').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             }
 
             function isLevelComplete(level) {
@@ -326,197 +366,6 @@ function placeCard(level, position) {
                     const position = parseInt(placeholder.dataset.position);
                     placeholder.classList.toggle('available', isValidMove(level, position));
                 });
-            }
-
-            function startTimer() {
-                timerInterval = setInterval(() => {
-                    timeRemaining--;
-                    updateTimerDisplay();
-                    if (timeRemaining <= 0) {
-                        endGame('timeout');
-                    }
-                }, 1000);
-            }
-
-            function updateTimerDisplay() {
-                const minutes = Math.floor(timeRemaining / 60);
-                const seconds = timeRemaining % 60;
-                document.querySelector('.timer').textContent = 
-                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            }
-function getColumnCards(col) {
-                return gameBoard.map(row => row[col]);
-            }
-
-            function formatElapsedTime(remainingTime) {
-                const elapsedSeconds = 150 - remainingTime;
-                const minutes = Math.floor(elapsedSeconds / 60);
-                const seconds = elapsedSeconds % 60;
-                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-
-            function renderCardSmall(card) {
-                if (card === null) {
-                    return `
-                        <div style="
-                            display: inline-flex;
-                            align-items: center;
-                            background: #666;
-                            border-radius: 2px;
-                            padding: 2px 3px;
-                            margin: 1px;
-                            font-size: 10px;
-                            color: #444;
-                            width: 25px;
-                            justify-content: center;
-                        ">
-                            －
-                        </div>
-                    `;
-                }
-                return `
-                    <div style="
-                        display: inline-flex;
-                        align-items: center;
-                        background: white;
-                        border-radius: 2px;
-                        padding: 2px 3px;
-                        margin: 1px;
-                        font-size: 10px;
-                        color: ${card.suit === '♥' || card.suit === '♦' ? '#dc0000' : 'black'};
-                    ">
-                        ${card.value}${card.suit}
-                    </div>
-                `;
-            }
-
-            function evaluatePokerHand(cards) {
-                if (cards.every(card => card === null)) {
-                    return 'None';
-                }
-
-                const validCards = cards.filter(card => card !== null);
-                
-                const getCardValue = (card) => {
-                    const values = {
-                        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-                        'J': 11, 'Q': 12, 'K': 13, 'A': 14
-                    };
-                    return values[card.value];
-                };
-
-                const sortedHand = [...validCards].sort((a, b) => getCardValue(a) - getCardValue(b));
-                
-                if (validCards.length > 0) {
-                    const isFlush = validCards.every(card => card.suit === validCards[0].suit);
-                    
-                    let isStraight = true;
-                    if (validCards.length > 1) {
-                        for (let i = 1; i < sortedHand.length; i++) {
-                            if (getCardValue(sortedHand[i]) !== getCardValue(sortedHand[i-1]) + 1) {
-                                isStraight = false;
-                                break;
-                            }
-                        }
-                    } else {
-                        isStraight = false;
-                    }
-
-                    const valueCounts = {};
-                    validCards.forEach(card => {
-                        valueCounts[card.value] = (valueCounts[card.value] || 0) + 1;
-                    });
-                    const counts = Object.values(valueCounts);
-
-                    if (isFlush && isStraight && getCardValue(sortedHand[0]) === 10 && validCards.length === 5) return 'Royal Flush';
-                    if (isFlush && isStraight && validCards.length === 5) return 'Straight Flush';
-                    if (counts.includes(4)) return 'Four of a Kind';
-                    if (counts.includes(3) && counts.includes(2)) return 'Full House';
-                    if (isFlush && validCards.length === 5) return 'Flush';
-                    if (isStraight && validCards.length === 5) return 'Straight';
-                    if (counts.includes(3)) return 'Three of a Kind';
-                    if (counts.filter(count => count === 2).length === 2) return 'Two Pairs';
-                    if (counts.includes(2)) return 'One Pair';
-                    return 'High Card';
-                }
-                
-                return 'High Card';
-            }
-
-            function endGame(reason = 'complete') {
-                clearInterval(timerInterval);
-                
-                // Clear current card display
-                document.querySelector('.current-card').innerHTML = '';
-                
-                // Make deck appear empty
-                document.querySelector('.deck-pile').style.opacity = '0.3';
-                
-                // Evaluate each column
-                const results = [];
-                const columnCards = [];
-                for (let col = 0; col < 5; col++) {
-                    const cards = getColumnCards(col);
-                    columnCards.push(cards);
-                    results.push(evaluatePokerHand(cards));
-                }
-                
-                // Create and show results popup
-                const popup = document.createElement('div');
-                popup.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: #333;
-                    padding: 15px;
-                    border-radius: 10px;
-                    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                    z-index: 1000;
-                    width: 90%;
-                    max-width: 400px;
-                `;
-                
-                popup.innerHTML = `
-                    <h2 style="
-                        ${reason === 'timeout' ? 'color: #ff4444;' : 'color: #4CAF50;'} 
-                        text-align: center; 
-                        margin-bottom: 10px; 
-                        font-size: 20px;"
-                    >
-                        ${reason === 'timeout' ? 'TIME IS UP!' : 'GREAT JOB!'}
-                    </h2>
-                    <div style="margin-bottom: 10px;">
-                        ${results.map((result, index) => `
-                            <div style="margin: 5px 0; padding: 8px; background: #444; border-radius: 5px;">
-                                <div style="margin-bottom: 3px; font-size: 14px;">
-                                    <strong>Column ${index + 1}:</strong> ${result}
-                                </div>
-                                <div style="background: rgba(255,255,255,0.1); padding: 3px; border-radius: 3px; display: flex; flex-wrap: wrap; gap: 2px;">
-                                    ${columnCards[index].map(card => renderCardSmall(card)).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="color: #888; text-align: center; font-size: 14px;">
-                        ${reason === 'timeout' ? 'Time Limit: ' : 'Completion Time: '}${formatElapsedTime(timeRemaining)}
-                    </div>
-                `;
-                
-                // Add overlay
-                const overlay = document.createElement('div');
-                overlay.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.7);
-                    z-index: 999;
-                `;
-                
-                document.body.appendChild(overlay);
-                document.body.appendChild(popup);
             }
         });
     </script>
